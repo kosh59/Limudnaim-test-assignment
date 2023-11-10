@@ -3,10 +3,11 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import PixabaySelectPreview from "@/Components/PixabaySelectPreview.vue";
+import FileInput from "@/Components/FileInput.vue";
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
-    mustVerifyEmail: Boolean,
     status: String,
 });
 
@@ -15,6 +16,8 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    user_image: null,
+    pixabay_url: null,
 });
 </script>
 
@@ -22,13 +25,10 @@ const form = useForm({
     <section>
         <header>
             <h2 class="text-lg font-medium text-gray-900">Profile Information</h2>
-
-            <p class="mt-1 text-sm text-gray-600">
-                Update your account's profile information and email address.
-            </p>
         </header>
 
         <form @submit.prevent="form.patch(route('profile.update'))" class="mt-6 space-y-6">
+            <img style="max-width: 200px;max-height: 200px;" v-if="user.image_path" :src="route('users.getUserImage', user.id)"/>
             <div>
                 <InputLabel for="name" value="Name" />
 
@@ -60,25 +60,24 @@ const form = useForm({
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div v-if="props.mustVerifyEmail && user.email_verified_at === null">
-                <p class="text-sm mt-2 text-gray-800">
-                    Your email address is unverified.
-                    <Link
-                        :href="route('verification.send')"
-                        method="post"
-                        as="button"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        Click here to re-send the verification email.
-                    </Link>
-                </p>
+            <div class="mt-4">
+                <InputLabel for="user_image" value="Load profile image" />
+                <FileInput
+                    id="user_image"
+                    type="file"
+                    class="mt-1 block w-full"
+                    v-model="form.user_image"
+                />
 
-                <div
-                    v-show="props.status === 'verification-link-sent'"
-                    class="mt-2 font-medium text-sm text-green-600"
-                >
-                    A new verification link has been sent to your email address.
-                </div>
+                <InputError class="mt-2" :message="form.errors.user_image" />
+            </div>
+
+            <div>
+                <InputLabel for="pixabay_url" value="You can choose profile image" />
+
+                <PixabaySelectPreview
+                    v-on:imageSelected="form.pixabay_url = $event.url"
+                />
             </div>
 
             <div class="flex items-center gap-4">

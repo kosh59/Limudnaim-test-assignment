@@ -4,18 +4,25 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import FileInput from "@/Components/FileInput.vue";
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import PixabaySelectPreview from "@/Components/PixabaySelectPreview.vue";
 
 const form = useForm({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
-    terms: false,
+    user_image: null,
+    pixabay_url: null,
 });
 
 const submit = () => {
+    // axios.put(route('register'), form).then(
+    //     () => form.reset('password', 'password_confirmation')
+    // );
     form.post(route('register'), {
+        forceFormData: true,
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
@@ -25,7 +32,7 @@ const submit = () => {
     <GuestLayout>
         <Head title="Register" />
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" enctype="multipart/form-data">
             <div>
                 <InputLabel for="name" value="Name" />
 
@@ -58,6 +65,20 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
+                <InputLabel for="phone" value="Phone number" />
+
+                <TextInput
+                    id="phone"
+                    type="text"
+                    class="mt-1 block w-full"
+                    v-model="form.phone"
+                    autocomplete="phone"
+                />
+
+                <InputError class="mt-2" :message="form.errors.password_confirmation" />
+            </div>
+
+            <div class="mt-4">
                 <InputLabel for="password" value="Password" />
 
                 <TextInput
@@ -72,19 +93,39 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password_confirmation" value="Confirm Password" />
+<!--            <div class="mt-4">-->
+<!--                <InputLabel for="password_confirmation" value="Confirm Password" />-->
 
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
+<!--                <TextInput-->
+<!--                    id="password_confirmation"-->
+<!--                    type="password"-->
+<!--                    class="mt-1 block w-full"-->
+<!--                    v-model="form.password_confirmation"-->
+<!--                    required-->
+<!--                    autocomplete="new-password"-->
+<!--                />-->
+
+<!--                <InputError class="mt-2" :message="form.errors.password_confirmation" />-->
+<!--            </div>-->
+
+            <div class="mt-4">
+                <InputLabel for="user_image" value="User picture" />
+                <FileInput
+                    id="user_image"
+                    type="file"
                     class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
+                    v-model="form.user_image"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password_confirmation" />
+                <InputError class="mt-2" :message="form.errors.user_image" />
+            </div>
+
+            <div class="mt-2">
+                <InputLabel for="pixabay_url" value="You can choose profile image" />
+
+                <PixabaySelectPreview
+                    v-on:imageSelected="form.pixabay_url = $event.url"
+                />
             </div>
 
             <div class="flex items-center justify-end mt-4">

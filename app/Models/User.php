@@ -2,12 +2,21 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\File;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * Class User
+ * @package App\Models
+ * @property int $id
+ * @property string $email
+ * @property string $phone
+ * @property string $image_path
+ *
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -21,6 +30,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'image_path',
     ];
 
     /**
@@ -41,4 +52,25 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function updateAvatar($filePath, $fileExtension)
+    {
+        $storagePath = '/app/avatars';
+        File::ensureDirectoryExists(storage_path($storagePath));
+        $name = \Str::uuid() . '.' . $fileExtension;
+        $fileTo = storage_path("$storagePath/{$name}");
+        if(File::move($filePath, $fileTo)) {
+            $this->update(['image_path' => "$storagePath/{$name}"]);
+        }
+    }
+
+    public function updateAvatarFromUrl($url)
+    {
+        $ext = explode(".", $url);
+        $fileExtension = end($ext);
+        $name = \Str::uuid() . '.' . $fileExtension;
+        $fileTmpPath = storage_path().'/'.$name;
+        file_put_contents($fileTmpPath, file_get_contents($url));
+        $this->updateAvatar($fileTmpPath, $fileExtension);
+    }
 }

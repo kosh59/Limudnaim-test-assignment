@@ -21,8 +21,14 @@ return [
         'scheme' => 'https',
     ],
 
-    'postmark' => [
-        'token' => env('POSTMARK_TOKEN'),
+    'mailchimp' => [
+        'token' => env('MANDRILL_APP_KEY'),
+        'from' => 'test@limudnaim.co.il',
+        'fromName' => 'Limudnaim co.',
+    ],
+
+    'pixabay' => [
+        'token' => env('PIXABAY_TOKEN'),
     ],
 
     'ses' => [

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\UserCreated;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +34,8 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', Rules\Password::defaults()],
+            'user_image' => ['nullable', 'image'],
         ]);
 
         $user = User::create([
@@ -43,7 +44,13 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
+        if ($request->hasFile('user_image')) {
+            $user->updateAvatar($request->file('user_image')->path(), $request->file('user_image')->getClientOriginalExtension());
+        } elseif ($fileUrl = $request->input('pixabay_url')) {
+            $user->updateAvatarFromUrl($fileUrl);
+        }
+
+        event(new UserCreated($user->id));
 
         Auth::login($user);
 

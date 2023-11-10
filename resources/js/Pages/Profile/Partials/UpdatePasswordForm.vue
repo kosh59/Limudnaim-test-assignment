@@ -12,7 +12,6 @@ const currentPasswordInput = ref(null);
 const form = useForm({
     current_password: '',
     password: '',
-    password_confirmation: '',
 });
 
 const updatePassword = () => {
@@ -21,7 +20,7 @@ const updatePassword = () => {
         onSuccess: () => form.reset(),
         onError: () => {
             if (form.errors.password) {
-                form.reset('password', 'password_confirmation');
+                form.reset('password');
                 passwordInput.value.focus();
             }
             if (form.errors.current_password) {
@@ -72,20 +71,6 @@ const updatePassword = () => {
                 />
 
                 <InputError :message="form.errors.password" class="mt-2" />
-            </div>
-
-            <div>
-                <InputLabel for="password_confirmation" value="Confirm Password" />
-
-                <TextInput
-                    id="password_confirmation"
-                    v-model="form.password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
-
-                <InputError :message="form.errors.password_confirmation" class="mt-2" />
             </div>
 
             <div class="flex items-center gap-4">

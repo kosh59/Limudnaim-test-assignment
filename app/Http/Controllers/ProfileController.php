@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use Faker\Core\Uuid;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,12 +28,12 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request)
     {
         $request->user()->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($fileUrl = $request->input('pixabay_url')) {
+            $request->user()->updateAvatarFromUrl($fileUrl);
         }
 
         $request->user()->save();
@@ -59,5 +60,23 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    public function getPixabayImages(Request $request)
+    {
+        $page = $request->input('page', 1);
+        $token = config('services.pixabay.token');
+        $response = \Http::get("https://pixabay.com/api/", [
+            'key' => $token,
+            'q' => 'orange+book',
+            'image_type' => 'illustration',
+            'orientation' => 'landscape',
+            'per_page' => 6,
+            'page' => $page,
+        ]);
+
+        $images = data_get($response->json(), 'hits');
+
+        return response()->json($images);
     }
 }

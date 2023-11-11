@@ -53,6 +53,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    /**
+     * @param $filePath
+     * @param $fileExtension
+     * @return void
+     */
     public function updateAvatar($filePath, $fileExtension)
     {
         $storagePath = '/app/avatars';
@@ -64,6 +69,10 @@ class User extends Authenticatable
         }
     }
 
+    /**
+     * @param $url
+     * @return void
+     */
     public function updateAvatarFromUrl($url)
     {
         $ext = explode(".", $url);
